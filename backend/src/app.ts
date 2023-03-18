@@ -1,10 +1,29 @@
 import "dotenv/config";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
+import NoteModel from "./models/note";
 
 const app = express();
 
-app.get("/", (req, res) => {
-    res.send("Hello, World - nice!");
+app.get("/", async (req, res, next) => {
+    try {
+        // throw Error("Error");
+        const notes = await NoteModel.find().exec();
+        res.status(200).json(notes);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// app.use(req, res, next) => {
+//     next(Error("404 - Not Found"));
+// });
+
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+    console.log(error);
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) errorMessage = error.message;
+    res.status(500).json({ error: errorMessage });
 });
 
 export default app;
