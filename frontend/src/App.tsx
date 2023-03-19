@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
-import logo from './Notate-blue-rounded.svg';
+import React, { useEffect, useState } from 'react';
+// import logo from './Notate-blue-rounded.svg';
 import './App.css';
-import { Button } from 'react-bootstrap';
+import { Note } from './models/note';
 
 function App() {
-    const [clickCount, setClickCount] = useState(0);
+    const [notes, setNotes] = useState<Note[]>([]);
+
+    useEffect(() => {
+        async function loadNotes() {
+            try {
+                const response = await fetch("/api/notes", { method: "GET" });
+                const data = await response.json();
+                setNotes(data);
+            } catch (error) {
+                console.error(error);
+                alert(error);
+            }
+        }
+        loadNotes();
+    }, []);
 
     return (
         <div className="App">
-        <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
-            <p>
-                Edit <code>src/App.tsx</code> and save to reload.
-            </p>
-            <p>
-                Hi. This is cool. I'm going to make a change to this file and see if it updates in the browser.
-            </p>
-            <Button onClick={() => setClickCount(clickCount + 1)}>
-                Clicked {clickCount} times
-            </Button> 
-        </header>
+            {JSON.stringify(notes)}
         </div>
     );
 }
