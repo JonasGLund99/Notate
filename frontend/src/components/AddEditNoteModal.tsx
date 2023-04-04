@@ -2,7 +2,8 @@ import { Button, Form, Modal } from "react-bootstrap";
 import { Note } from "../models/note";
 import { NoteInput } from "../network/notes_api";
 import * as NotesApi from "../network/notes_api";
-import { useForm } from "react-hook-form";
+import { RegisterOptions, UseFormRegisterReturn, useForm } from "react-hook-form";
+import TextInputField from "./form/TextInputField";
 
 interface AddEditNoteModalProps {
     noteToEdit?: Note,
@@ -43,27 +44,24 @@ const AddEditNoteModal = ({ noteToEdit, onDismiss, onNoteSaved }: AddEditNoteMod
 
             <Modal.Body>
                 <Form id="addEditNoteForm" onSubmit={handleSubmit(onSubmit)}>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control 
-                        type="text" 
+                    <TextInputField
+                        name="title"
+                        label="Title"
+                        type="text"
                         placeholder="Enter title" 
-                        isInvalid={!!errors.title}
-                        {...register("title", { required: "Required"})}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            {errors.title?.message}
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control 
-                        as="textarea" 
+                        register={register}
+                        registerOptions={{ required: "Required" }}
+                        error={errors.title}        
+                    />
+                    
+                    <TextInputField
+                        name="text"
+                        label="Text"
+                        as="textarea"
                         rows={5}
-                        placeholder="Enter description"
-                        {...register("text")}
-                        />
-                    </Form.Group>
+                        placeholder="Enter text"
+                        register={register}
+                    />
                 </Form>
             </Modal.Body>
 
