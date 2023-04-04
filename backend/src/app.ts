@@ -20,7 +20,6 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         maxAge: 60 * 60 * 1000, // 1 hour
-
     },
     rolling: true, // refresh cookie automatically
     store: MongoStore.create({
