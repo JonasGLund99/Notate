@@ -3,10 +3,15 @@ import NoteModel from "../models/note";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
 import note from "../models/note";
+import { assertIsDefined } from "../util/assertIsDefined";
 
 export const getNotes: RequestHandler = async (req, res, next) => {
+    const authenticatedUserId = req.session.userId; 
+    
     try {
-        const notes = await NoteModel.find().exec();
+        assertIsDefined(authenticatedUserId);
+
+        const notes = await NoteModel.find({ userId: authenticatedUserId }).exec();
         res.status(200).json(notes);
     } catch (error) {
         next(error);
@@ -15,13 +20,20 @@ export const getNotes: RequestHandler = async (req, res, next) => {
 
 export const getNote: RequestHandler = async (req, res, next) => {
     const noteId = req.params.noteId;
+    const authenticatedUserId = req.session.userId; 
     
     try {
+        assertIsDefined(authenticatedUserId);
+
         checkValidObjectId(noteId);
 
         const note = await NoteModel.findById(noteId).exec();
         if (!note) {
             throw createHttpError(404, "Note not found");
+        }
+
+        if (!note.userId.equals(authenticatedUserId)) {
+            throw createHttpError(401, "You are not authorized to access this note");
         }
 
         res.status(200).json(note);
@@ -42,11 +54,15 @@ export const createNote: RequestHandler<unknown, unknown, CreateNoteBody, unknow
     const text = req.body.text;
     const tag = req.body.tag;
     const color = req.body.color;
-
+    const authenticatedUserId = req.session.userId; 
+    
     try {
+        assertIsDefined(authenticatedUserId);
+        
         checkIfNoteHasTitle(title);
 
         const newNote = await NoteModel.create({
+            userId: authenticatedUserId,
             title: title,
             text: text,
             tag: tag,
@@ -77,14 +93,22 @@ export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBod
     const newText = req.body.text;
     const newTag = req.body.tag;
     const newColor = req.body.color;
+    const authenticatedUserId = req.session.userId; 
     
     try {
+        assertIsDefined(authenticatedUserId);
+        
         checkValidObjectId(noteId);
+
         checkIfNoteHasTitle(newTitle);
         
         const note = await NoteModel.findById(noteId).exec();
         if (!note) {
             throw createHttpError(404, "Note not found");
+        }
+
+        if (!note.userId.equals(authenticatedUserId)) {
+            throw createHttpError(401, "You are not authorized to access this note");
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -106,13 +130,20 @@ export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBod
 
 export const deleteNote: RequestHandler = async (req, res, next) => {
     const noteId = req.params.noteId;
-
+    const authenticatedUserId = req.session.userId; 
+    
     try {
+        assertIsDefined(authenticatedUserId);
+
         checkValidObjectId(noteId);
         
         const note = await NoteModel.findById(noteId).exec();
         if (!note) {
             throw createHttpError(404, "Note not found");
+        }
+
+        if (!note.userId.equals(authenticatedUserId)) {
+            throw createHttpError(401, "You are not authorized to access this note");
         }
 
         await note.deleteOne();

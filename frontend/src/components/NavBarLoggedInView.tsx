@@ -17,6 +17,7 @@ const NavBarLoggedInView = ({user, onLogoutSuccessful} : NavBarLoggedInViewProps
             alert(error);
             console.error(error);
         }
+        window.location.reload();
     }
     
     return (  
